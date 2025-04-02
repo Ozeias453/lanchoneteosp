@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LANCHONETE OSP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: red;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: yellow;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Sans MS', cursive;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        .menu {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .menu-column {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button {
+            cursor: pointer;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff9800;
+            color: #fff;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #e68900;
+        }
+        #pagamento-container {
+            display: none;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        footer {
+            margin-top: 20px;
+            padding: 10px;
+            background: #ff9800;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">LANCHONETE OSP 🍔</div>
+    <div class="container">
+        <div class="menu">
+            <div class="menu-column">
+                <h2>🍔 Lanches</h2>
+                <div id="cardapio-lanches"></div>
+            </div>
+            <div class="menu-column">
+                <h2>🥤 Bebidas</h2>
+                <div id="cardapio-bebidas"></div>
+            </div>
+        </div>
+        <h3>🛒 Carrinho</h3>
+        <ul id="itens-carrinho"></ul>
+        <p>Total: R$ <span id="total">0.00</span></p>
+        <button onclick="finalizarPedido()">Finalizar Pedido</button>
+        
+        <div id="pagamento-container">
+            <h2>Escolha a Forma de Pagamento</h2>
+            <select id="pagamento">
+                <option value="PIX">PIX</option>
+                <option value="Cartão">Cartão</option>
+                <option value="Dinheiro">Dinheiro</option>
+            </select>
+            <h3>Informações para entrega:</h3>
+            <input type="text" id="nome" placeholder="Nome" required>
+            <input type="text" id="telefone" placeholder="Telefone" required>
+            <input type="text" id="endereco" placeholder="Endereço" required>
+            <button onclick="confirmarPedido()">Confirmar Pedido</button>
+        </div>
+    </div>
+    
+    <footer>
+        Telefone: (43) 99136-9482 | Endereço: Rua Raul Proença 821
+    </footer>
+
+    <script>
+        let carrinho = [];
+        let total = 0;
+
+        const lanches = [
+            { nome: "Misto Quente", preco: 10.50 },
+            { nome: "Dog Mix", preco: 10.50 },
+            { nome: "X Burg", preco: 11.50 },
+            { nome: "Cachorro Quente", preco: 12.00 },
+            { nome: "Fominha", preco: 12.50 },
+            { nome: "X Salada", preco: 13.50 },
+            { nome: "X Calabresa", preco: 15.50 },
+            { nome: "X Tudo", preco: 25.50 }
+        ];
+        
+        const bebidas = [
+            { nome: "Refrigerante", preco: 5.0 },
+            { nome: "Suco Natural", preco: 6.5 },
+            { nome: "Água", preco: 3.0 }
+        ];
+
+        function adicionarCarrinho(nome, preco) {
+            carrinho.push({ nome, preco });
+            atualizarCarrinho();
+        }
+
+        function removerItem(index) {
+            carrinho.splice(index, 1);
+            atualizarCarrinho();
+        }
+
+        function atualizarCarrinho() {
+            let lista = document.getElementById('itens-carrinho');
+            lista.innerHTML = '';
+            total = 0;
+            carrinho.forEach((item, index) => {
+                let li = document.createElement('li');
+                li.innerHTML = `${item.nome} - R$${item.preco.toFixed(2)} <button onclick="removerItem(${index})">❌</button>`;
+                lista.appendChild(li);
+                total += item.preco;
+            });
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+
+        function finalizarPedido() {
+            document.getElementById('pagamento-container').style.display = 'block';
+        }
+
+        function confirmarPedido() {
+            let nome = document.getElementById('nome').value;
+            let telefone = document.getElementById('telefone').value;
+            let endereco = document.getElementById('endereco').value;
+            let pagamento = document.getElementById('pagamento').value;
+            
+            let mensagem = `Pedido de: ${nome}\nTelefone: ${telefone}\nEndereço: ${endereco}\nPagamento: ${pagamento}\n\nItens:\n`;
+            carrinho.forEach(item => {
+                mensagem += `- ${item.nome} R$${item.preco.toFixed(2)}\n`;
+            });
+            mensagem += `\nTotal: R$${total.toFixed(2)}`;
+            
+            let url = `https://wa.me/43991369482?text=${encodeURIComponent(mensagem)}`;
+            window.location.href = url;
+        }
+
+        window.onload = () => {
+            document.getElementById('cardapio-lanches').innerHTML = lanches.map(l => `<div class='item'>${l.nome} - R$${l.preco.toFixed(2)} <button onclick="adicionarCarrinho('${l.nome}', ${l.preco})">Adicionar</button></div>`).join('');
+            document.getElementById('cardapio-bebidas').innerHTML = bebidas.map(b => `<div class='item'>${b.nome} - R$${b.preco.toFixed(2)} <button onclick="adicionarCarrinho('${b.nome}', ${b.preco})">Adicionar</button></div>`).join('');
+        };
+    </script>
+</body>
+</html>
